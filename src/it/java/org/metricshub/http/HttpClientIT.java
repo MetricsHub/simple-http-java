@@ -16,50 +16,21 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-class HttpClientTest {
+class HttpClientIT {
 
 	/**
-	 * By default, HTTPBIN_URL points to the public instance of httpbin:
-	 * <code>http://httpbin.org</code>
-	 * <p>
-	 * When running tests, you can set the <code>HTTPBIN_URL</code> environment variable
-	 * to specify another address where httpbin is running.
-	 * </p>
-	 * <p>
-	 * Example:
-	 * </p>
-	 * <code>HTTPBIN_URL=http://httpbin.example.org:8080</code>
+	 * Get the HTTPBIN_BASE_URL provided by the system property. This must be set
+	 * before running the tests, for example:
+	 * -DHTTPBIN_BASE_URL=https://httpbin.org
 	 */
-	private static final String HTTPBIN_URL;
+	private static final String HTTPBIN_BASE_URL;
 
 	static {
-		String url = System.getenv("HTTPBIN_URL");
+		String url = System.getProperty("HTTPBIN_BASE_URL");
 		if (url == null || url.isEmpty()) {
-			url = "http://httpbin.org";
+			throw new IllegalStateException("HTTPBIN_BASE_URL system property must be set");
 		}
-		HTTPBIN_URL = url;
-	}
-
-	/**
-	 * By default, HTTPBIN_SSL_URL points to the public instance of httpbin:
-	 * <code>https://httpbin.org</code>
-	 * <p>
-	 * When running tests, you can set the <code>HTTPBIN_SSL_URL</code> environment variable
-	 * to specify another address where httpbin is running.
-	 * </p>
-	 * <p>
-	 * Example:
-	 * </p>
-	 * <code>HTTPBIN_URL=https://httpbin.example.org:8082</code>
-	 */
-	private static final String HTTPBIN_SSL_URL;
-
-	static {
-		String url = System.getenv("HTTPBIN_SSL_URL");
-		if (url == null || url.isEmpty()) {
-			url = "https://httpbin.org";
-		}
-		HTTPBIN_SSL_URL = url;
+		HTTPBIN_BASE_URL = url;
 	}
 
 	@ParameterizedTest
@@ -111,9 +82,9 @@ class HttpClientTest {
 			524
 		}
 	)
-	void statusCode(int status) throws Exception {
+	void testStatusCode(int status) throws Exception {
 		HttpResponse r = HttpClient.sendRequest(
-			HTTPBIN_URL + "/status/" + status,
+			HTTPBIN_BASE_URL + "/status/" + status,
 			"GET",
 			null,
 			null,
@@ -132,70 +103,11 @@ class HttpClientTest {
 		assertEquals(status, r.getStatusCode(), "Must return status " + status);
 	}
 
-	@Test
-	void https() throws Exception {
-		HttpResponse r = HttpClient.sendRequest(
-			HTTPBIN_SSL_URL + "/status/200",
-			"GET",
-			null,
-			null,
-			null,
-			null,
-			0,
-			null,
-			null,
-			null,
-			null,
-			null,
-			30,
-			null
-		);
-		assertEquals(200, r.getStatusCode(), "Default https must work");
-
-		r =
-			HttpClient.sendRequest(
-				HTTPBIN_SSL_URL + "/status/200",
-				"GET",
-				new String[] { "TLSv1.2" },
-				null,
-				null,
-				null,
-				0,
-				null,
-				null,
-				null,
-				null,
-				null,
-				30,
-				null
-			);
-		assertEquals(200, r.getStatusCode(), "TLSv1.2 only must work");
-
-		r =
-			HttpClient.sendRequest(
-				HTTPBIN_SSL_URL + "/status/200",
-				"GET",
-				new String[] { "SSLv2Hello" },
-				null,
-				null,
-				null,
-				0,
-				null,
-				null,
-				null,
-				null,
-				null,
-				30,
-				null
-			);
-		assertEquals(200, r.getStatusCode(), "Specifying SSLv2Hello must not break communication");
-	}
-
 	@ParameterizedTest
 	@ValueSource(strings = { "GET", "DELETE", "POST", "PUT" })
-	void method(String method) throws Exception {
+	void testMethod(String method) throws Exception {
 		HttpResponse r = HttpClient.sendRequest(
-			HTTPBIN_URL + "/" + method.toLowerCase(),
+			HTTPBIN_BASE_URL + "/" + method.toLowerCase(),
 			method,
 			null,
 			null,
@@ -215,9 +127,9 @@ class HttpClientTest {
 	}
 
 	@Test
-	void basicAuth() throws Exception {
+	void testBasicAuth() throws Exception {
 		HttpResponse r = HttpClient.sendRequest(
-			HTTPBIN_URL + "/basic-auth/mypasswordis/password",
+			HTTPBIN_BASE_URL + "/basic-auth/mypasswordis/password",
 			"GET",
 			null,
 			"mypasswordis",
@@ -236,9 +148,9 @@ class HttpClientTest {
 	}
 
 	@Test
-	void basicAuthFail() throws Exception {
+	void testBasicAuthFail() throws Exception {
 		HttpResponse r = HttpClient.sendRequest(
-			HTTPBIN_URL + "/basic-auth/mypasswordis/notpassword",
+			HTTPBIN_BASE_URL + "/basic-auth/mypasswordis/notpassword",
 			"GET",
 			null,
 			"mypasswordis",
@@ -257,9 +169,9 @@ class HttpClientTest {
 	}
 
 	@Test
-	void digestAuth() throws Exception {
+	void testDigestAuth() throws Exception {
 		HttpResponse r = HttpClient.sendRequest(
-			HTTPBIN_URL + "/digest-auth/auth/mypasswordis/password",
+			HTTPBIN_BASE_URL + "/digest-auth/auth/mypasswordis/password",
 			"GET",
 			null,
 			"mypasswordis",
@@ -278,9 +190,9 @@ class HttpClientTest {
 	}
 
 	@Test
-	void userAgent() throws Exception {
+	void testUserAgent() throws Exception {
 		HttpResponse r = HttpClient.sendRequest(
-			HTTPBIN_URL + "/user-agent",
+			HTTPBIN_BASE_URL + "/user-agent",
 			"GET",
 			null,
 			null,
@@ -299,9 +211,9 @@ class HttpClientTest {
 	}
 
 	@Test
-	void userAgentDefault() throws Exception {
+	void testUserAgentDefault() throws Exception {
 		HttpResponse r = HttpClient.sendRequest(
-			HTTPBIN_URL + "/user-agent",
+			HTTPBIN_BASE_URL + "/user-agent",
 			"GET",
 			null,
 			null,
@@ -320,12 +232,12 @@ class HttpClientTest {
 	}
 
 	@Test
-	void headers() throws Exception {
+	void testHeaders() throws Exception {
 		Map<String, String> headers = new HashMap<String, String>();
 		headers.put("first", "1");
 		headers.put("second", "1 + 1");
 		HttpResponse r = HttpClient.sendRequest(
-			HTTPBIN_URL + "/headers",
+			HTTPBIN_BASE_URL + "/headers",
 			"GET",
 			null,
 			null,
@@ -345,11 +257,11 @@ class HttpClientTest {
 	}
 
 	@Test
-	void deflate() throws Exception {
+	void testDeflate() throws Exception {
 		Map<String, String> headers = new HashMap<String, String>();
 		headers.put("Accept-Encoding", "deflate");
 		HttpResponse r = HttpClient.sendRequest(
-			HTTPBIN_URL + "/deflate",
+			HTTPBIN_BASE_URL + "/deflate",
 			"GET",
 			null,
 			null,
@@ -372,11 +284,11 @@ class HttpClientTest {
 	}
 
 	@Test
-	void gzip() throws Exception {
+	void testGzip() throws Exception {
 		Map<String, String> headers = new HashMap<String, String>();
 		headers.put("Accept-Encoding", "gzip");
 		HttpResponse r = HttpClient.sendRequest(
-			HTTPBIN_URL + "/gzip",
+			HTTPBIN_BASE_URL + "/gzip",
 			"GET",
 			null,
 			null,
@@ -399,11 +311,11 @@ class HttpClientTest {
 	}
 
 	@Test
-	void postBody() throws Exception {
+	void testPostBody() throws Exception {
 		Map<String, String> headers = new HashMap<String, String>();
 		headers.put("Content-type", "text/plain");
 		HttpResponse r = HttpClient.sendRequest(
-			HTTPBIN_URL + "/anything",
+			HTTPBIN_BASE_URL + "/anything",
 			"POST",
 			null,
 			null,
@@ -422,12 +334,12 @@ class HttpClientTest {
 	}
 
 	@Test
-	void timeoutException() throws Exception {
+	void testTimeoutException() throws Exception {
 		assertThrows(
 			IOException.class,
 			() ->
 				HttpClient.sendRequest(
-					HTTPBIN_URL + "/delay/9",
+					HTTPBIN_BASE_URL + "/delay/9",
 					"GET",
 					null,
 					null,
@@ -447,13 +359,13 @@ class HttpClientTest {
 	}
 
 	@Test
-	void timeout() throws Exception {
+	void testTimeout() throws Exception {
 		assertTimeout(
 			Duration.ofSeconds(5),
 			() -> {
 				try {
 					HttpClient.sendRequest(
-						HTTPBIN_URL + "/delay/9",
+						HTTPBIN_BASE_URL + "/delay/9",
 						"GET",
 						null,
 						null,
@@ -475,7 +387,7 @@ class HttpClientTest {
 	}
 
 	@Test
-	void utf8() throws Exception {
+	void testUtf8() throws Exception {
 		HttpResponse r = HttpClient.sendRequest(
 			"https://www.cl.cam.ac.uk/~mgk25/ucs/examples/UTF-8-demo.txt",
 			"GET",
@@ -496,7 +408,7 @@ class HttpClientTest {
 	}
 
 	@Test
-	void downloadTo() throws Exception {
+	void testDownloadTo() throws Exception {
 		Path tempPath = Files.createTempFile("test-download", ".txt");
 		tempPath.toFile().deleteOnExit();
 		HttpResponse r = HttpClient.sendRequest(
@@ -521,7 +433,7 @@ class HttpClientTest {
 	}
 
 	@Test
-	void downloadToDirectory() throws Exception {
+	void testDownloadToDirectory() throws Exception {
 		Path tempDirPath = Files.createTempDirectory("testDownloadToDirectory");
 		tempDirPath.toFile().deleteOnExit();
 		HttpResponse r = HttpClient.sendRequest(

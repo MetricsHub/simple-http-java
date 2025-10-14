@@ -1,0 +1,56 @@
+name: Integration Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  integration-tests:
+    name: Run Integration Tests
+    runs-on: ubuntu-latest
+    services:
+      httpbin:
+        image: kennethreitz/httpbin
+        ports:
+          - 31888:80
+        options: >-
+          --health-cmd "curl --fail http://localhost:80/get || exit 1"
+          --health-interval 5s
+          --health-retries 5
+          --health-timeout 5s
+
+    steps:
+
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+  
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: "17"
+        distribution: temurin
+        cache: maven
+
+    - name: Set up Maven settings.xml
+      uses: s4u/maven-settings-action@v3.1.0
+      with:
+        sonatypeSnapshots: true
+        repositories: >-
+          [
+            {
+              "id": "central-snapshots",
+              "name": "Maven Repository Switchboard",
+              "url": "https://central.sonatype.com/repository/maven-snapshots",
+              "snapshots": { "enabled": true },
+              "releases": { "enabled": false }
+            }
+          ]
+
+    - name: Run Integration Tests
+      env:
+        HTTPBIN_BASE_URL: http://localhost:31888
+      run: |
+        mvn -B verify -Pintegration-tests \
+          -Dhttpbin.url=$HTTPBIN_BASE_URL
