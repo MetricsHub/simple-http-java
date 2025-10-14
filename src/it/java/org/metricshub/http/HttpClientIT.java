@@ -21,14 +21,14 @@ class HttpClientIT {
 	/**
 	 * Get the HTTPBIN_BASE_URL provided by the system property. This must be set
 	 * before running the tests, for example:
-	 * -DHTTPBIN_BASE_URL=https://httpbin.org
+	 * -Dhttpbin.url=https://httpbin.org
 	 */
 	private static final String HTTPBIN_BASE_URL;
 
 	static {
-		String url = System.getProperty("HTTPBIN_BASE_URL");
+		String url = System.getProperty("httpbin.url");
 		if (url == null || url.isEmpty()) {
-			throw new IllegalStateException("HTTPBIN_BASE_URL system property must be set");
+			throw new IllegalStateException("httpbin.url system property must be set");
 		}
 		HTTPBIN_BASE_URL = url;
 	}
