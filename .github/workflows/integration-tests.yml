@@ -15,14 +15,21 @@ jobs:
         image: kennethreitz/httpbin
         ports:
           - 31888:80
-        options: >-
-          --health-cmd "curl --fail http://localhost:80/get || exit 1"
-          --health-interval 5s
-          --health-retries 5
-          --health-timeout 5s
-
     steps:
 
+    - name: Wait for httpbin to be ready
+      run: |
+        for i in {1..10}; do
+          if curl -sSf http://localhost:31888/get >/dev/null; then
+            echo "httpbin is ready!"
+            exit 0
+          fi
+          echo "Waiting for httpbin..."
+          sleep 3
+        done
+        echo "httpbin did not start in time" >&2
+        exit 1
+  
     - name: Checkout Repository
       uses: actions/checkout@v4
   
