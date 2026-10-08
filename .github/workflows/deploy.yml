@@ -10,10 +10,7 @@ on:
 
 jobs:
   deploy:
-    uses: metricshub/workflows/.github/workflows/maven-central-deploy.yml@v6
+    uses: metricshub/workflows/.github/workflows/maven-central-deploy.yml@v7
     with:
       jdkVersion: "17"
-      # Maven 3.10 only sends the credentials of server "central" to repo.maven.apache.org (the built-in "central"
-      # repository) unless told otherwise: without this, the snapshots are sent to Central without them (HTTP 401)
-      mavenOptions: "-Dmaven.repository.credentialScope=id"
     secrets: inherit
