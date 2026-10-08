@@ -363,7 +363,8 @@ public class HttpClient {
 					}
 				}
 			}
-			response.appendBody(new String(bodyBytes.toByteArray(), charset));
+			// Decode straight from the buffer (toByteArray() would copy it first)
+			response.appendBody(bodyBytes.toString(charset.name()));
 
 			// Return
 			return response;
