@@ -8,7 +8,7 @@
 	</parent>
 
 	<artifactId>simple-http-java</artifactId>
-	<version>1.0.03</version>
+	<version>1.0.04-SNAPSHOT</version>
 
 	<name>HTTP Java Client</name>
 	<description>HTTP Client for Java</description>
@@ -37,7 +37,7 @@
 	<scm>
 		<connection>scm:git:https://github.com/metricshub/simple-http-java.git</connection>
 		<url>https://github.com/metricshub/simple-http-java</url>
-		<tag>v1.0.03</tag>
+		<tag>HEAD</tag>
 	</scm>
 
 	<developers>
@@ -70,7 +70,7 @@
 
 		<!-- Reproducible Build -->
 		<!-- See https://maven.apache.org/guides/mini/guide-reproducible-builds.html -->
-		<project.build.outputTimestamp>2026-10-08T20:39:01Z</project.build.outputTimestamp>
+		<project.build.outputTimestamp>2026-10-08T20:39:54Z</project.build.outputTimestamp>
 	</properties>
 
 	<dependencyManagement>
