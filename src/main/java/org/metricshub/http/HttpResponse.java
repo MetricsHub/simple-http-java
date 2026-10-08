@@ -31,7 +31,8 @@ package org.metricshub.http;
 public class HttpResponse {
 
 	private int statusCode;
-	private StringBuilder body;
+	// The body is kept as a String: a StringBuilder would copy it once when appended and once more in getBody()
+	private String body;
 	private StringBuilder header;
 
 	/**
@@ -40,7 +41,7 @@ public class HttpResponse {
 	public HttpResponse() {
 		statusCode = 0;
 		header = new StringBuilder();
-		body = new StringBuilder();
+		body = "";
 	}
 
 	/**
@@ -86,16 +87,19 @@ public class HttpResponse {
 	 * @return the body of the HTTP response
 	 */
 	public String getBody() {
-		return body.toString();
+		return body;
 	}
 
 	/**
 	 * Append content to the body of the HTTP response
+	 * <p>
+	 * Each call after the first copies the whole body: the body is meant to be set by a single call.
 	 *
-	 * @param data Data to append
+	 * @param data Data to append ("null" is appended for null, as StringBuilder.append() does)
 	 */
 	public void appendBody(String data) {
-		body.append(data);
+		String value = String.valueOf(data);
+		body = body.isEmpty() ? value : body.concat(value);
 	}
 
 	/**
@@ -103,6 +107,7 @@ public class HttpResponse {
 	 */
 	@Override
 	public String toString() {
-		return new StringBuilder().append(header).append("\n").append(body).toString();
+		// concat() copies the body once, where a StringBuilder copies it twice
+		return header.toString().concat("\n").concat(body);
 	}
 }
